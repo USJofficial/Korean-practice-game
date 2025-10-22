@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Korean Word Defense</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+        }
+        
+        .game-container {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .game-area {
+            background: #000;
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 400px;
+            position: relative;
+            overflow: hidden;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .cloud {
+            color: #87CEEB;
+            white-space: pre;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 10px;
+        }
+        
+        .enemy {
+            color: #ff6b6b;
+            white-space: pre;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: top 0.1s linear;
+        }
+        
+        .korean-word {
+            color: #ffd93d;
+            text-align: center;
+            font-size: 1.5em;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+        
+        input {
+            flex: 1;
+            padding: 15px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            font-family: 'Courier New', monospace;
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #45a049;
+        }
+        
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        
+        .message {
+            text-align: center;
+            font-size: 1.3em;
+            min-height: 30px;
+            margin-top: 10px;
+        }
+        
+        .correct {
+            color: #4CAF50;
+        }
+        
+        .incorrect {
+            color: #ff6b6b;
+        }
+        
+        .game-over {
+            color: #ff6b6b;
+            font-size: 2em;
+            font-weight: bold;
+        }
+        
+        .keywords {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        
+        .keywords h3 {
+            margin-bottom: 10px;
+            color: #ffd93d;
+        }
+        
+        .keyword-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .keyword {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        .hint {
+            text-align: center;
+            color: #87CEEB;
+            margin-top: 10px;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🇰🇷 Korean Word Defense 🇰🇷</h1>
+        
+        <div class="stats">
+            <div class="stat-item">Score: <span id="score">0</span></div>
+            <div class="stat-item">Lives: <span id="lives">3</span></div>
+            <div class="stat-item">Level: <span id="level">1</span></div>
+        </div>
+        
+        <div class="game-area" id="gameArea">
+            <pre class="cloud">  .- ~ ~-(       )_ _
+ /                     ~ -.
+|                           \
+ \                         .'
+   ~- . _____________ . -~</pre>
+        </div>
+        
+        <div class="controls">
+            <div class="input-area">
+                <input type="text" id="answerInput" placeholder="Type the Korean word meaning..." disabled>
+                <button id="submitBtn" onclick="checkAnswer()" disabled>Submit</button>
+            </div>
+            <button id="startBtn" onclick="startGame()">Start Game</button>
+            <div class="message" id="message"></div>
+            <div class="hint" id="hint"></div>
+        </div>
+        
+        <div class="keywords">
+            <h3>💡 Current Word Keywords:</h3>
+            <div class="keyword-list" id="keywordList"></div>
+        </div>
+    </div>
+
+    <script>
+        const vocab = [
+            { korean: "배회하다", meaning: "wander", keywords: ["공기", "바람", "walk"] },
+            { korean: "재상", meaning: "minister", keywords: ["공기", "바람", "government"] },
+            { korean: "병법", meaning: "strategy", keywords: ["공기", "바람", "war"] },
+            { korean: "후세", meaning: "posterity", keywords: ["공기", "바람", "future"] },
+            { korean: "대장부", meaning: "gentleman", keywords: ["공기", "바람", "man"] },
+            { korean: "왕후장상", meaning: "nobility", keywords: ["공기", "바람", "royal"] },
+            { korean: "장한", meaning: "admirable", keywords: ["공기", "바람", "praise"] },
+            { korean: "소인", meaning: "petty person", keywords: ["공기", "바람", "small"] },
+            { korean: "대감", meaning: "lord", keywords: ["공기", "바람", "respect"] },
+            { korean: "천생", meaning: "natural born", keywords: ["공기", "바람", "destiny"] },
+            { korean: "원통", meaning: "resentment", keywords: ["공기", "바람", "anger"] },
+            { korean: "대성통곡", meaning: "wail loudly", keywords: ["공기", "바람", "cry"] },
+            { korean: "방자하다", meaning: "impudent", keywords: ["공기", "바람", "rude"] },
+            { korean: "입신양명", meaning: "success", keywords: ["공기", "바람", "fame"] },
+            { korean: "대장인", meaning: "craftsman", keywords: ["공기", "바람", "skill"] },
+            { korean: "영욕", meaning: "honor and disgrace", keywords: ["공기", "바람", "glory"] },
+            { korean: "노비", meaning: "slave", keywords: ["공기", "바람", "servant"] },
+            { korean: "소자", meaning: "young son", keywords: ["공기", "바람", "child"] },
+            { korean: "팔자", meaning: "fate", keywords: ["공기", "바람", "destiny"] }
+        ];
+
+        let currentWord = null;
+        let score = 0;
+        let lives = 3;
+        let level = 1;
+        let enemyPosition = 150;
+        let gameInterval = null;
+        let enemySpeed = 120; // Slower initial speed
+        let usedWords = [];
+        let isWaitingForNext = false;
+
+        const asciiEnemy = `|
+|
+|
+|
+O
+/|\\
+/ \\`;
+
+        function startGame() {
+            score = 0;
+            lives = 3;
+            level = 1;
+            enemySpeed = 120; // Much slower starting speed
+            usedWords = [];
+            isWaitingForNext = false;
+            updateStats();
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('answerInput').disabled = false;
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('answerInput').focus();
+            document.getElementById('message').textContent = '';
+            document.getElementById('hint').textContent = '';
+            nextWord();
+        }
+
+        function nextWord() {
+            if (isWaitingForNext) return;
+            
+            const availableWords = vocab.filter(w => !usedWords.includes(w.korean));
+            
+            if (availableWords.length === 0) {
+                usedWords = [];
+                level++;
+                enemySpeed = Math.max(40, enemySpeed - 15); // Gradual speed increase
+                updateStats();
+                document.getElementById('hint').textContent = '🎉 Level Up! Speed increased!';
+            }
+            
+            const randomIndex = Math.floor(Math.random() * (availableWords.length || vocab.length));
+            currentWord = availableWords.length > 0 ? availableWords[randomIndex] : vocab[randomIndex];
+            usedWords.push(currentWord.korean);
+            
+            enemyPosition = 150;
+            showEnemy();
+            displayKeywords();
+            
+            if (gameInterval) clearInterval(gameInterval);
+            gameInterval = setInterval(moveEnemy, enemySpeed);
+            
+            document.getElementById('answerInput').value = '';
+            document.getElementById('message').textContent = '';
+            document.getElementById('answerInput').focus();
+        }
+
+        function showEnemy() {
+            const existingEnemy = document.querySelector('.enemy');
+            if (existingEnemy) existingEnemy.remove();
+            
+            const enemyDiv = document.createElement('div');
+            enemyDiv.className = 'enemy';
+            enemyDiv.innerHTML = asciiEnemy + '<div class="korean-word">' + currentWord.korean + '</div>';
+            enemyDiv.style.top = enemyPosition + 'px';
+            document.getElementById('gameArea').appendChild(enemyDiv);
+        }
+
+        function moveEnemy() {
+            if (isWaitingForNext) return;
+            
+            enemyPosition += 1; // Slower movement
+            const enemyEl = document.querySelector('.enemy');
+            if (enemyEl) {
+                enemyEl.style.top = enemyPosition + 'px';
+            }
+            
+            if (enemyPosition > 350) {
+                lives--;
+                updateStats();
+                clearInterval(gameInterval);
+                isWaitingForNext = true;
+                
+                if (lives <= 0) {
+                    gameOver();
+                } else {
+                    document.getElementById('message').innerHTML = '<span class="incorrect">💔 Word reached the bottom! The answer was: ' + currentWord.meaning + '</span>';
+                    setTimeout(() => {
+                        isWaitingForNext = false;
+                        nextWord();
+                    }, 2500);
+                }
+            }
+        }
+
+        function checkAnswer() {
+            if (isWaitingForNext || !currentWord) return;
+            
+            const answer = document.getElementById('answerInput').value.trim().toLowerCase();
+            const correctAnswer = currentWord.meaning.toLowerCase();
+            
+            // Check if answer matches the meaning OR any of the keywords
+            const isCorrect = answer === correctAnswer || 
+                             currentWord.keywords.some(k => k.toLowerCase() === answer);
+            
+            if (isCorrect) {
+                score += 10 * level;
+                updateStats();
+                clearInterval(gameInterval);
+                isWaitingForNext = true;
+                
+                // Remove the enemy from screen
+                const enemyEl = document.querySelector('.enemy');
+                if (enemyEl) {
+                    enemyEl.style.color = '#4CAF50';
+                    setTimeout(() => enemyEl.remove(), 500);
+                }
+                
+                document.getElementById('message').innerHTML = '<span class="correct">✅ Correct! +' + (10 * level) + ' points!</span>';
+                document.getElementById('hint').textContent = 'Correct answer: ' + currentWord.meaning;
+                
+                setTimeout(() => {
+                    isWaitingForNext = false;
+                    document.getElementById('hint').textContent = '';
+                    nextWord();
+                }, 1500);
+            } else {
+                document.getElementById('message').innerHTML = '<span class="incorrect">❌ Try again! Keep typing...</span>';
+                setTimeout(() => {
+                    if (!isWaitingForNext) {
+                        document.getElementById('message').textContent = '';
+                    }
+                }, 1000);
+            }
+        }
+
+        function displayKeywords() {
+            const keywordList = document.getElementById('keywordList');
+            keywordList.innerHTML = currentWord.keywords.map(k => 
+                '<span class="keyword">' + k + '</span>'
+            ).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('lives').textContent = lives;
+            document.getElementById('level').textContent = level;
+        }
+
+        function gameOver() {
+            clearInterval(gameInterval);
+            document.getElementById('message').innerHTML = '<div class="game-over">🎮 GAME OVER! Final Score: ' + score + '</div>';
+            document.getElementById('hint').textContent = 'Click Start Game to play again!';
+            document.getElementById('answerInput').disabled = true;
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('startBtn').disabled = false;
+            
+            const enemyEl = document.querySelector('.enemy');
+            if (enemyEl) enemyEl.remove();
+        }
+
+        document.getElementById('answerInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+    </script>
+</body>
+</html>
