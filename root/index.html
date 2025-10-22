@@ -1,1 +1,508 @@
-#blahblahblah
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Korean Word Defense - Terminal Edition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', 'Courier', monospace;
+            background: #000;
+            color: #00ff00;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .terminal {
+            width: 100%;
+            max-width: 900px;
+            background: #0a0a0a;
+            border: 3px solid #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3), inset 0 0 30px rgba(0, 255, 0, 0.05);
+            padding: 20px;
+            position: relative;
+        }
+        
+        .terminal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 255, 0, 0.03) 0px,
+                    transparent 1px,
+                    transparent 2px,
+                    rgba(0, 255, 0, 0.03) 3px
+                );
+            pointer-events: none;
+        }
+        
+        .terminal-header {
+            border-bottom: 1px solid #00ff00;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .ascii-title {
+            white-space: pre;
+            line-height: 1.2;
+            font-size: 0.7em;
+            color: #00ff00;
+            text-shadow: 0 0 5px #00ff00;
+        }
+        
+        .stats-bar {
+            white-space: pre;
+            margin: 15px 0;
+            padding: 10px;
+            border: 1px solid #00ff00;
+            background: rgba(0, 255, 0, 0.05);
+        }
+        
+        .game-area {
+            min-height: 450px;
+            border: 1px solid #00ff00;
+            padding: 20px;
+            margin: 15px 0;
+            position: relative;
+            background: rgba(0, 255, 0, 0.02);
+        }
+        
+        .cloud {
+            color: #00ffff;
+            white-space: pre;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 20px;
+            text-shadow: 0 0 5px #00ffff;
+        }
+        
+        .enemy {
+            color: #ff0000;
+            white-space: pre;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: top 0.1s linear;
+            text-shadow: 0 0 5px #ff0000;
+        }
+        
+        .korean-word {
+            color: #ffff00;
+            text-align: center;
+            font-size: 1.3em;
+            margin-top: 5px;
+            font-weight: bold;
+            text-shadow: 0 0 5px #ffff00;
+        }
+        
+        .input-line {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            border: 1px solid #00ff00;
+            background: rgba(0, 255, 0, 0.05);
+        }
+        
+        .prompt {
+            color: #00ff00;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            outline: none;
+            caret-color: #00ff00;
+        }
+        
+        input::placeholder {
+            color: #006600;
+        }
+        
+        .button-area {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 10px 20px;
+            background: transparent;
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+        
+        .btn:hover:not(:disabled) {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 0 0 10px #00ff00;
+        }
+        
+        .btn:disabled {
+            border-color: #003300;
+            color: #003300;
+            cursor: not-allowed;
+        }
+        
+        .message-area {
+            white-space: pre-wrap;
+            min-height: 60px;
+            padding: 10px;
+            border: 1px solid #00ff00;
+            margin: 15px 0;
+            background: rgba(0, 255, 0, 0.05);
+        }
+        
+        .keywords-area {
+            padding: 10px;
+            border: 1px solid #00ff00;
+            margin: 15px 0;
+            background: rgba(0, 255, 0, 0.05);
+        }
+        
+        .keyword-line {
+            margin: 5px 0;
+        }
+        
+        .correct {
+            color: #00ff00;
+            animation: blink 0.5s;
+        }
+        
+        .incorrect {
+            color: #ff0000;
+            animation: blink 0.5s;
+        }
+        
+        .info {
+            color: #ffff00;
+        }
+        
+        .cyan {
+            color: #00ffff;
+        }
+        
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.3; }
+        }
+        
+        .cursor {
+            animation: cursor-blink 1s infinite;
+        }
+        
+        @keyframes cursor-blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .separator {
+            border-top: 1px dashed #00ff00;
+            margin: 10px 0;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal">
+        <div class="terminal-header">
+            <pre class="ascii-title">
+╔═══════════════════════════════════════════════════════════════╗
+║  _  _____  ____  _____    _    _   _  __        _____  ____  ║
+║ | |/ / _ \|  _ \| ____|  / \  | \ | | \ \      / / _ \|  _ \ ║
+║ | ' / | | | |_) |  _|   / _ \ |  \| |  \ \ /\ / / | | | |_) |║
+║ | . \ |_| |  _ <| |___ / ___ \| |\  |   \ V  V /| |_| |  _ < ║
+║ |_|\_\___/|_| \_\_____/_/   \_\_| \_|    \_/\_/  \___/|_| \_\║
+║                                                               ║
+║              -=- TERMINAL DEFENSE EDITION -=-                 ║
+╚═══════════════════════════════════════════════════════════════╝
+            </pre>
+        </div>
+
+        <div class="stats-bar" id="statsBar">
+┌────────────────────────────────────────────────────────────┐
+│ SCORE: <span id="score">0000</span>  │  LIVES: ♥♥♥  │  LEVEL: <span id="level">01</span>  │  STATUS: READY
+└────────────────────────────────────────────────────────────┘
+        </div>
+
+        <div class="game-area" id="gameArea">
+            <pre class="cloud">  .- ~ ~-(       )_ _
+ /                     ~ -.
+|                           \
+ \                         .'
+   ~- . _____________ . -~</pre>
+        </div>
+
+        <div class="separator"></div>
+
+        <div class="input-line">
+            <span class="prompt">root@korean:~$</span>
+            <input type="text" id="answerInput" placeholder="type answer here..." disabled>
+            <span class="cursor">█</span>
+        </div>
+
+        <div class="button-area">
+            <button class="btn" id="submitBtn" onclick="checkAnswer()" disabled>[SUBMIT]</button>
+            <button class="btn" id="startBtn" onclick="startGame()">[START GAME]</button>
+        </div>
+
+        <div class="separator"></div>
+
+        <div class="message-area" id="messageArea">
+> System ready. Press [START GAME] to begin...
+> Defend the terminal from falling Korean words!
+> Type the meaning or keywords before they reach bottom...
+        </div>
+
+        <div class="separator"></div>
+
+        <div class="keywords-area" id="keywordsArea">
+┌─ KEYWORDS ────────────────────────────────────────────────┐
+│ Waiting for game start...                                 │
+└───────────────────────────────────────────────────────────┘
+        </div>
+    </div>
+
+    <script>
+        const vocab = [
+            { korean: "배회하다", meaning: "wander", keywords: ["공기", "바람", "walk"] },
+            { korean: "재상", meaning: "minister", keywords: ["공기", "바람", "government"] },
+            { korean: "병법", meaning: "strategy", keywords: ["공기", "바람", "war"] },
+            { korean: "후세", meaning: "posterity", keywords: ["공기", "바람", "future"] },
+            { korean: "대장부", meaning: "gentleman", keywords: ["공기", "바람", "man"] },
+            { korean: "왕후장상", meaning: "nobility", keywords: ["공기", "바람", "royal"] },
+            { korean: "장한", meaning: "admirable", keywords: ["공기", "바람", "praise"] },
+            { korean: "소인", meaning: "petty person", keywords: ["공기", "바람", "small"] },
+            { korean: "대감", meaning: "lord", keywords: ["공기", "바람", "respect"] },
+            { korean: "천생", meaning: "natural born", keywords: ["공기", "바람", "destiny"] },
+            { korean: "원통", meaning: "resentment", keywords: ["공기", "바람", "anger"] },
+            { korean: "대성통곡", meaning: "wail loudly", keywords: ["공기", "바람", "cry"] },
+            { korean: "방자하다", meaning: "impudent", keywords: ["공기", "바람", "rude"] },
+            { korean: "입신양명", meaning: "success", keywords: ["공기", "바람", "fame"] },
+            { korean: "대장인", meaning: "craftsman", keywords: ["공기", "바람", "skill"] },
+            { korean: "영욕", meaning: "honor and disgrace", keywords: ["공기", "바람", "glory"] },
+            { korean: "노비", meaning: "slave", keywords: ["공기", "바람", "servant"] },
+            { korean: "소자", meaning: "young son", keywords: ["공기", "바람", "child"] },
+            { korean: "팔자", meaning: "fate", keywords: ["공기", "바람", "destiny"] }
+        ];
+
+        let currentWord = null;
+        let score = 0;
+        let lives = 3;
+        let level = 1;
+        let enemyPosition = 150;
+        let gameInterval = null;
+        let enemySpeed = 120;
+        let usedWords = [];
+        let isWaitingForNext = false;
+
+        const asciiEnemy = `    |
+    |
+    |
+    |
+    O
+   /|\\
+   / \\`;
+
+        function startGame() {
+            score = 0;
+            lives = 3;
+            level = 1;
+            enemySpeed = 120;
+            usedWords = [];
+            isWaitingForNext = false;
+            updateStats();
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('answerInput').disabled = false;
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('answerInput').focus();
+            addMessage('> GAME STARTED!', 'correct');
+            addMessage('> Defend against incoming Korean words!');
+            nextWord();
+        }
+
+        function nextWord() {
+            if (isWaitingForNext) return;
+            
+            const availableWords = vocab.filter(w => !usedWords.includes(w.korean));
+            
+            if (availableWords.length === 0) {
+                usedWords = [];
+                level++;
+                enemySpeed = Math.max(40, enemySpeed - 15);
+                updateStats();
+                addMessage('> LEVEL UP! Speed increased!', 'info');
+            }
+            
+            const randomIndex = Math.floor(Math.random() * (availableWords.length || vocab.length));
+            currentWord = availableWords.length > 0 ? availableWords[randomIndex] : vocab[randomIndex];
+            usedWords.push(currentWord.korean);
+            
+            enemyPosition = 150;
+            showEnemy();
+            displayKeywords();
+            
+            if (gameInterval) clearInterval(gameInterval);
+            gameInterval = setInterval(moveEnemy, enemySpeed);
+            
+            document.getElementById('answerInput').value = '';
+            document.getElementById('answerInput').focus();
+        }
+
+        function showEnemy() {
+            const existingEnemy = document.querySelector('.enemy');
+            if (existingEnemy) existingEnemy.remove();
+            
+            const enemyDiv = document.createElement('div');
+            enemyDiv.className = 'enemy';
+            enemyDiv.innerHTML = asciiEnemy + '<div class="korean-word">' + currentWord.korean + '</div>';
+            enemyDiv.style.top = enemyPosition + 'px';
+            document.getElementById('gameArea').appendChild(enemyDiv);
+        }
+
+        function moveEnemy() {
+            if (isWaitingForNext) return;
+            
+            enemyPosition += 1;
+            const enemyEl = document.querySelector('.enemy');
+            if (enemyEl) {
+                enemyEl.style.top = enemyPosition + 'px';
+            }
+            
+            if (enemyPosition > 380) {
+                lives--;
+                updateStats();
+                clearInterval(gameInterval);
+                isWaitingForNext = true;
+                
+                if (lives <= 0) {
+                    gameOver();
+                } else {
+                    addMessage('> WORD REACHED BOTTOM! Answer was: ' + currentWord.meaning, 'incorrect');
+                    addMessage('> Life lost. Continuing...', 'incorrect');
+                    setTimeout(() => {
+                        isWaitingForNext = false;
+                        nextWord();
+                    }, 2500);
+                }
+            }
+        }
+
+        function checkAnswer() {
+            if (isWaitingForNext || !currentWord) return;
+            
+            const answer = document.getElementById('answerInput').value.trim().toLowerCase();
+            const correctAnswer = currentWord.meaning.toLowerCase();
+            
+            const isCorrect = answer === correctAnswer || 
+                             currentWord.keywords.some(k => k.toLowerCase() === answer);
+            
+            if (isCorrect) {
+                score += 10 * level;
+                updateStats();
+                clearInterval(gameInterval);
+                isWaitingForNext = true;
+                
+                const enemyEl = document.querySelector('.enemy');
+                if (enemyEl) {
+                    enemyEl.style.color = '#00ff00';
+                    setTimeout(() => enemyEl.remove(), 500);
+                }
+                
+                addMessage('> CORRECT! +' + (10 * level) + ' points', 'correct');
+                addMessage('> Answer: ' + currentWord.meaning, 'cyan');
+                
+                setTimeout(() => {
+                    isWaitingForNext = false;
+                    nextWord();
+                }, 1500);
+            } else {
+                addMessage('> INCORRECT! Try again...', 'incorrect');
+            }
+        }
+
+        function displayKeywords() {
+            const area = document.getElementById('keywordsArea');
+            area.innerHTML = `┌─ KEYWORDS ────────────────────────────────────────────────┐
+│ ${currentWord.keywords.map(k => '[' + k + ']').join(' • ')}                                    
+└───────────────────────────────────────────────────────────┘`;
+        }
+
+        function updateStats() {
+            const scoreStr = String(score).padStart(4, '0');
+            const levelStr = String(level).padStart(2, '0');
+            const hearts = '♥'.repeat(lives) + '♡'.repeat(3 - lives);
+            const status = lives > 0 ? 'ACTIVE' : 'GAME OVER';
+            
+            document.getElementById('statsBar').innerHTML = `┌────────────────────────────────────────────────────────────┐
+│ SCORE: ${scoreStr}  │  LIVES: ${hearts}  │  LEVEL: ${levelStr}  │  STATUS: ${status}
+└────────────────────────────────────────────────────────────┘`;
+        }
+
+        function addMessage(text, className = '') {
+            const area = document.getElementById('messageArea');
+            const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
+            const msg = document.createElement('div');
+            msg.className = className;
+            msg.textContent = text;
+            
+            area.appendChild(msg);
+            
+            // Keep only last 5 messages
+            while (area.children.length > 5) {
+                area.removeChild(area.firstChild);
+            }
+            
+            area.scrollTop = area.scrollHeight;
+        }
+
+        function gameOver() {
+            clearInterval(gameInterval);
+            addMessage('╔══════════════════════════════════════════╗', 'incorrect');
+            addMessage('║         GAME OVER!                       ║', 'incorrect');
+            addMessage('║   Final Score: ' + score + '                       ║', 'incorrect');
+            addMessage('╚══════════════════════════════════════════╝', 'incorrect');
+            document.getElementById('answerInput').disabled = true;
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('startBtn').disabled = false;
+            
+            const enemyEl = document.querySelector('.enemy');
+            if (enemyEl) enemyEl.remove();
+        }
+
+        document.getElementById('answerInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+    </script>
+</body>
+</html>
