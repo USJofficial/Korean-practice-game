@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Korean Word Defense</title>
+    <title>Korean Word Defense - Terminal Edition</title>
     <style>
         * {
             margin: 0;
@@ -12,190 +12,247 @@
         }
         
         body {
-            font-family: 'Courier New', monospace;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Courier New', 'Courier', monospace;
+            background: #000;
+            color: #00ff00;
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
             padding: 20px;
-            color: #fff;
         }
         
-        .game-container {
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 15px;
-            padding: 30px;
-            max-width: 900px;
+        .terminal {
             width: 100%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            max-width: 900px;
+            background: #0a0a0a;
+            border: 3px solid #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3), inset 0 0 30px rgba(0, 255, 0, 0.05);
+            padding: 20px;
+            position: relative;
         }
         
-        h1 {
+        .terminal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 255, 0, 0.03) 0px,
+                    transparent 1px,
+                    transparent 2px,
+                    rgba(0, 255, 0, 0.03) 3px
+                );
+            pointer-events: none;
+        }
+        
+        .terminal-header {
+            border-bottom: 1px solid #00ff00;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
             text-align: center;
-            margin-bottom: 20px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
         
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
-            font-size: 1.2em;
+        .ascii-title {
+            white-space: pre;
+            line-height: 1.2;
+            font-size: 0.7em;
+            color: #00ff00;
+            text-shadow: 0 0 5px #00ff00;
         }
         
-        .stat-item {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px 20px;
-            border-radius: 10px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+        .stats-bar {
+            white-space: pre;
+            margin: 15px 0;
+            padding: 10px;
+            border: 1px solid #00ff00;
+            background: rgba(0, 255, 0, 0.05);
         }
         
         .game-area {
-            background: #000;
+            min-height: 450px;
+            border: 1px solid #00ff00;
             padding: 20px;
-            border-radius: 10px;
-            min-height: 400px;
+            margin: 15px 0;
             position: relative;
-            overflow: hidden;
-            font-size: 14px;
-            line-height: 1.4;
+            background: rgba(0, 255, 0, 0.02);
         }
         
         .cloud {
-            color: #87CEEB;
+            color: #00ffff;
             white-space: pre;
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
-            top: 10px;
+            top: 20px;
+            text-shadow: 0 0 5px #00ffff;
         }
         
         .enemy {
-            color: #ff6b6b;
+            color: #ff0000;
             white-space: pre;
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
             transition: top 0.1s linear;
+            text-shadow: 0 0 5px #ff0000;
         }
         
         .korean-word {
-            color: #ffd93d;
+            color: #ffff00;
             text-align: center;
-            font-size: 1.5em;
+            font-size: 1.3em;
             margin-top: 5px;
             font-weight: bold;
+            text-shadow: 0 0 5px #ffff00;
         }
         
-        .controls {
-            margin-top: 20px;
+        .input-line {
             display: flex;
-            flex-direction: column;
-            gap: 15px;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            border: 1px solid #00ff00;
+            background: rgba(0, 255, 0, 0.05);
         }
         
-        .input-area {
-            display: flex;
-            gap: 10px;
+        .prompt {
+            color: #00ff00;
+            margin-right: 10px;
+            font-weight: bold;
         }
         
         input {
             flex: 1;
-            padding: 15px;
-            font-size: 1.2em;
+            background: transparent;
             border: none;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.9);
+            color: #00ff00;
             font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            outline: none;
+            caret-color: #00ff00;
         }
         
-        button {
-            padding: 15px 30px;
-            font-size: 1.2em;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 10px;
+        input::placeholder {
+            color: #006600;
+        }
+        
+        .button-area {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 10px 20px;
+            background: transparent;
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
             cursor: pointer;
-            font-family: 'Courier New', monospace;
-            transition: background 0.3s;
+            transition: all 0.2s;
+            text-transform: uppercase;
         }
         
-        button:hover {
-            background: #45a049;
+        .btn:hover:not(:disabled) {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 0 0 10px #00ff00;
         }
         
-        button:disabled {
-            background: #666;
+        .btn:disabled {
+            border-color: #003300;
+            color: #003300;
             cursor: not-allowed;
         }
         
-        .message {
-            text-align: center;
-            font-size: 1.3em;
-            min-height: 30px;
-            margin-top: 10px;
+        .message-area {
+            white-space: pre-wrap;
+            min-height: 60px;
+            padding: 10px;
+            border: 1px solid #00ff00;
+            margin: 15px 0;
+            background: rgba(0, 255, 0, 0.05);
+        }
+        
+        .keywords-area {
+            padding: 10px;
+            border: 1px solid #00ff00;
+            margin: 15px 0;
+            background: rgba(0, 255, 0, 0.05);
+        }
+        
+        .keyword-line {
+            margin: 5px 0;
         }
         
         .correct {
-            color: #4CAF50;
+            color: #00ff00;
+            animation: blink 0.5s;
         }
         
         .incorrect {
-            color: #ff6b6b;
+            color: #ff0000;
+            animation: blink 0.5s;
         }
         
-        .game-over {
-            color: #ff6b6b;
-            font-size: 2em;
-            font-weight: bold;
+        .info {
+            color: #ffff00;
         }
         
-        .keywords {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 10px;
+        .cyan {
+            color: #00ffff;
         }
         
-        .keywords h3 {
-            margin-bottom: 10px;
-            color: #ffd93d;
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.3; }
         }
         
-        .keyword-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+        .cursor {
+            animation: cursor-blink 1s infinite;
         }
         
-        .keyword {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 5px 15px;
-            border-radius: 5px;
-            font-size: 0.9em;
+        @keyframes cursor-blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
         }
 
-        .hint {
-            text-align: center;
-            color: #87CEEB;
-            margin-top: 10px;
-            font-size: 1.1em;
+        .separator {
+            border-top: 1px dashed #00ff00;
+            margin: 10px 0;
+            opacity: 0.5;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <h1>🇰🇷 Korean Word Defense 🇰🇷</h1>
-        
-        <div class="stats">
-            <div class="stat-item">Score: <span id="score">0</span></div>
-            <div class="stat-item">Lives: <span id="lives">3</span></div>
-            <div class="stat-item">Level: <span id="level">1</span></div>
+    <div class="terminal">
+        <div class="terminal-header">
+            <pre class="ascii-title">
+╔═══════════════════════════════════════════════════════════════╗
+║  _  _____  ____  _____    _    _   _  __        _____  ____  ║
+║ | |/ / _ \|  _ \| ____|  / \  | \ | | \ \      / / _ \|  _ \ ║
+║ | ' / | | | |_) |  _|   / _ \ |  \| |  \ \ /\ / / | | | |_) |║
+║ | . \ |_| |  _ <| |___ / ___ \| |\  |   \ V  V /| |_| |  _ < ║
+║ |_|\_\___/|_| \_\_____/_/   \_\_| \_|    \_/\_/  \___/|_| \_\║
+║                                                               ║
+║              -=- TERMINAL DEFENSE EDITION -=-                 ║
+╚═══════════════════════════════════════════════════════════════╝
+            </pre>
         </div>
-        
+
+        <div class="stats-bar" id="statsBar">
+┌────────────────────────────────────────────────────────────┐
+│ SCORE: <span id="score">0000</span>  │  LIVES: ♥♥♥  │  LEVEL: <span id="level">01</span>  │  STATUS: READY
+└────────────────────────────────────────────────────────────┘
+        </div>
+
         <div class="game-area" id="gameArea">
             <pre class="cloud">  .- ~ ~-(       )_ _
  /                     ~ -.
@@ -203,20 +260,34 @@
  \                         .'
    ~- . _____________ . -~</pre>
         </div>
-        
-        <div class="controls">
-            <div class="input-area">
-                <input type="text" id="answerInput" placeholder="Type the Korean word meaning..." disabled>
-                <button id="submitBtn" onclick="checkAnswer()" disabled>Submit</button>
-            </div>
-            <button id="startBtn" onclick="startGame()">Start Game</button>
-            <div class="message" id="message"></div>
-            <div class="hint" id="hint"></div>
+
+        <div class="separator"></div>
+
+        <div class="input-line">
+            <span class="prompt">root@korean:~$</span>
+            <input type="text" id="answerInput" placeholder="type answer here..." disabled>
+            <span class="cursor">█</span>
         </div>
-        
-        <div class="keywords">
-            <h3>💡 Current Word Keywords:</h3>
-            <div class="keyword-list" id="keywordList"></div>
+
+        <div class="button-area">
+            <button class="btn" id="submitBtn" onclick="checkAnswer()" disabled>[SUBMIT]</button>
+            <button class="btn" id="startBtn" onclick="startGame()">[START GAME]</button>
+        </div>
+
+        <div class="separator"></div>
+
+        <div class="message-area" id="messageArea">
+> System ready. Press [START GAME] to begin...
+> Defend the terminal from falling Korean words!
+> Type the meaning or keywords before they reach bottom...
+        </div>
+
+        <div class="separator"></div>
+
+        <div class="keywords-area" id="keywordsArea">
+┌─ KEYWORDS ────────────────────────────────────────────────┐
+│ Waiting for game start...                                 │
+└───────────────────────────────────────────────────────────┘
         </div>
     </div>
 
@@ -249,23 +320,23 @@
         let level = 1;
         let enemyPosition = 150;
         let gameInterval = null;
-        let enemySpeed = 120; // Slower initial speed
+        let enemySpeed = 120;
         let usedWords = [];
         let isWaitingForNext = false;
 
-        const asciiEnemy = `|
-|
-|
-|
-O
-/|\\
-/ \\`;
+        const asciiEnemy = `    |
+    |
+    |
+    |
+    O
+   /|\\
+   / \\`;
 
         function startGame() {
             score = 0;
             lives = 3;
             level = 1;
-            enemySpeed = 120; // Much slower starting speed
+            enemySpeed = 120;
             usedWords = [];
             isWaitingForNext = false;
             updateStats();
@@ -273,8 +344,8 @@ O
             document.getElementById('answerInput').disabled = false;
             document.getElementById('submitBtn').disabled = false;
             document.getElementById('answerInput').focus();
-            document.getElementById('message').textContent = '';
-            document.getElementById('hint').textContent = '';
+            addMessage('> GAME STARTED!', 'correct');
+            addMessage('> Defend against incoming Korean words!');
             nextWord();
         }
 
@@ -286,9 +357,9 @@ O
             if (availableWords.length === 0) {
                 usedWords = [];
                 level++;
-                enemySpeed = Math.max(40, enemySpeed - 15); // Gradual speed increase
+                enemySpeed = Math.max(40, enemySpeed - 15);
                 updateStats();
-                document.getElementById('hint').textContent = '🎉 Level Up! Speed increased!';
+                addMessage('> LEVEL UP! Speed increased!', 'info');
             }
             
             const randomIndex = Math.floor(Math.random() * (availableWords.length || vocab.length));
@@ -303,7 +374,6 @@ O
             gameInterval = setInterval(moveEnemy, enemySpeed);
             
             document.getElementById('answerInput').value = '';
-            document.getElementById('message').textContent = '';
             document.getElementById('answerInput').focus();
         }
 
@@ -321,13 +391,13 @@ O
         function moveEnemy() {
             if (isWaitingForNext) return;
             
-            enemyPosition += 1; // Slower movement
+            enemyPosition += 1;
             const enemyEl = document.querySelector('.enemy');
             if (enemyEl) {
                 enemyEl.style.top = enemyPosition + 'px';
             }
             
-            if (enemyPosition > 350) {
+            if (enemyPosition > 380) {
                 lives--;
                 updateStats();
                 clearInterval(gameInterval);
@@ -336,7 +406,8 @@ O
                 if (lives <= 0) {
                     gameOver();
                 } else {
-                    document.getElementById('message').innerHTML = '<span class="incorrect">💔 Word reached the bottom! The answer was: ' + currentWord.meaning + '</span>';
+                    addMessage('> WORD REACHED BOTTOM! Answer was: ' + currentWord.meaning, 'incorrect');
+                    addMessage('> Life lost. Continuing...', 'incorrect');
                     setTimeout(() => {
                         isWaitingForNext = false;
                         nextWord();
@@ -351,7 +422,6 @@ O
             const answer = document.getElementById('answerInput').value.trim().toLowerCase();
             const correctAnswer = currentWord.meaning.toLowerCase();
             
-            // Check if answer matches the meaning OR any of the keywords
             const isCorrect = answer === correctAnswer || 
                              currentWord.keywords.some(k => k.toLowerCase() === answer);
             
@@ -361,48 +431,65 @@ O
                 clearInterval(gameInterval);
                 isWaitingForNext = true;
                 
-                // Remove the enemy from screen
                 const enemyEl = document.querySelector('.enemy');
                 if (enemyEl) {
-                    enemyEl.style.color = '#4CAF50';
+                    enemyEl.style.color = '#00ff00';
                     setTimeout(() => enemyEl.remove(), 500);
                 }
                 
-                document.getElementById('message').innerHTML = '<span class="correct">✅ Correct! +' + (10 * level) + ' points!</span>';
-                document.getElementById('hint').textContent = 'Correct answer: ' + currentWord.meaning;
+                addMessage('> CORRECT! +' + (10 * level) + ' points', 'correct');
+                addMessage('> Answer: ' + currentWord.meaning, 'cyan');
                 
                 setTimeout(() => {
                     isWaitingForNext = false;
-                    document.getElementById('hint').textContent = '';
                     nextWord();
                 }, 1500);
             } else {
-                document.getElementById('message').innerHTML = '<span class="incorrect">❌ Try again! Keep typing...</span>';
-                setTimeout(() => {
-                    if (!isWaitingForNext) {
-                        document.getElementById('message').textContent = '';
-                    }
-                }, 1000);
+                addMessage('> INCORRECT! Try again...', 'incorrect');
             }
         }
 
         function displayKeywords() {
-            const keywordList = document.getElementById('keywordList');
-            keywordList.innerHTML = currentWord.keywords.map(k => 
-                '<span class="keyword">' + k + '</span>'
-            ).join('');
+            const area = document.getElementById('keywordsArea');
+            area.innerHTML = `┌─ KEYWORDS ────────────────────────────────────────────────┐
+│ ${currentWord.keywords.map(k => '[' + k + ']').join(' • ')}                                    
+└───────────────────────────────────────────────────────────┘`;
         }
 
         function updateStats() {
-            document.getElementById('score').textContent = score;
-            document.getElementById('lives').textContent = lives;
-            document.getElementById('level').textContent = level;
+            const scoreStr = String(score).padStart(4, '0');
+            const levelStr = String(level).padStart(2, '0');
+            const hearts = '♥'.repeat(lives) + '♡'.repeat(3 - lives);
+            const status = lives > 0 ? 'ACTIVE' : 'GAME OVER';
+            
+            document.getElementById('statsBar').innerHTML = `┌────────────────────────────────────────────────────────────┐
+│ SCORE: ${scoreStr}  │  LIVES: ${hearts}  │  LEVEL: ${levelStr}  │  STATUS: ${status}
+└────────────────────────────────────────────────────────────┘`;
+        }
+
+        function addMessage(text, className = '') {
+            const area = document.getElementById('messageArea');
+            const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
+            const msg = document.createElement('div');
+            msg.className = className;
+            msg.textContent = text;
+            
+            area.appendChild(msg);
+            
+            // Keep only last 5 messages
+            while (area.children.length > 5) {
+                area.removeChild(area.firstChild);
+            }
+            
+            area.scrollTop = area.scrollHeight;
         }
 
         function gameOver() {
             clearInterval(gameInterval);
-            document.getElementById('message').innerHTML = '<div class="game-over">🎮 GAME OVER! Final Score: ' + score + '</div>';
-            document.getElementById('hint').textContent = 'Click Start Game to play again!';
+            addMessage('╔══════════════════════════════════════════╗', 'incorrect');
+            addMessage('║         GAME OVER!                       ║', 'incorrect');
+            addMessage('║   Final Score: ' + score + '                       ║', 'incorrect');
+            addMessage('╚══════════════════════════════════════════╝', 'incorrect');
             document.getElementById('answerInput').disabled = true;
             document.getElementById('submitBtn').disabled = true;
             document.getElementById('startBtn').disabled = false;
